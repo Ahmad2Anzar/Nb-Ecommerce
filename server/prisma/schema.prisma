@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//Adjust Models as needed
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String
+  sku         String?
+  price       Float
+  stock       Int
+  options     Json?
+  images      ProductImage[]
+  parentId    Int?
+  parent      Product?    @relation("VariantOf", fields: [parentId], references: [id])
+  variants    Product[]   @relation("VariantOf")
+  stockLogs   StockLog[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  url       String
+  altText   String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StockLog {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  type      String
+  quantity  Int
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model User {
+  userId       Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  password     String
+  loggedIn     Boolean   @default(false)
+  role         String    @default("user") // "manager", "employee", or "customer"
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  mobileNo     Int?
+  managerId    Int?      // used when role is "employee"
+  companyName  String?   // only used when role is "manager"
+
+  // Relations
+  manager      Manager?  @relation("UserToManager")
+  employee     Employee? @relation("UserToEmployee")
+  customer     Customer? @relation("UserToCustomer")
+}
+
+model Manager {
+  managerId    Int       @id @default(autoincrement())
+  user         User      @relation("UserToManager", fields: [userId], references: [userId])
+  userId       Int       @unique
+  managerName  String
+  email        String    @unique
+  createdAt    DateTime  @default(now())
+  mobileNo     Int
+  ratePerDay   Int
+  validity     DateTime
+  companyName  String    // mandatory for manager
+
+  // Employees assigned under this manager
+  employees    Employee[]
+}
+
+model Employee {
+  employeeId   Int       @id @default(autoincrement())
+  user         User      @relation("UserToEmployee", fields: [userId], references: [userId])
+  userId       Int       @unique
+  name         String
+  email        String    @unique
+  mobileNo     Int
+  managerId    Int       // link to Manager
+  manager      Manager   @relation(fields: [managerId], references: [managerId])
+}
+
+model Customer {
+  customerId   Int       @id @default(autoincrement())
+  user         User      @relation("UserToCustomer", fields: [userId], references: [userId])
+  userId       Int       @unique
+  name         String
+  email        String    @unique
+  mobileNo     Int
+  address      String
+}
+
