@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  TextField,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  IconButton,
-  Alert,
-  Box
-} from "@mui/material";
+import FloatingInput from "../utils/FloatingInput";
 
 interface Variant {
   name: string;
@@ -136,17 +126,21 @@ const VariantGenerator: React.FC<VariantGeneratorProps> = ({ onVariantsGenerated
   return (
     <div className="rounded-2xl shadow-xl bg-white p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">🛠️ Variant Generator</h2>
-  
+
       {error && (
         <div className="bg-red-100 text-red-700 px-4 py-2 mb-4 rounded-md border border-red-300">
           {error}
         </div>
       )}
-  
-      {variants.map((variant: any, variantIndex: number) => (
+
+      {variants.map((variant, variantIndex) => (
         <div key={variantIndex} className="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4">
           <div className="relative mb-4">
-            <input
+            <FloatingInput
+            label={'Variant Name'}
+            value={variant.name}
+            onChange={(e) => handleVariantNameChange(variantIndex, e)}/>
+            {/* <input
               type="text"
               placeholder=" "
               value={variant.name}
@@ -158,84 +152,99 @@ const VariantGenerator: React.FC<VariantGeneratorProps> = ({ onVariantsGenerated
               peer-focus:top-0 peer-focus:text-sm peer-focus:text-blue-600 
               peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:text-sm">
               Variant Name (e.g., Size, Color)
-            </label>
+            </label> */}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            {variant.options.map((option: string, optionIndex: number) => (
+            {variant.options.map((option, optionIndex) => (
               <div key={optionIndex} className="relative">
                 <input
                   type="text"
                   placeholder={`Option ${optionIndex + 1}`}
                   value={option}
                   onChange={(e) => handleOptionChange(variantIndex, optionIndex, e)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white px-4 py-3 border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button
+               <button
                   type="button"
                   onClick={() => removeOption(variantIndex, optionIndex)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-600 font-bold text-base w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100"
+                  className="absolute bg-white border-2 border-red-600 right-2 top-1/2 transform -translate-y-1/2 text-red-800 font-bold text-base w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-100"
                 >
                   ×
                 </button>
+
               </div>
             ))}
           </div>
-  
-          <div className="flex gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => addOption(variantIndex)}
-              className="border border-blue-500 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-100 transition"
-            >
-              ➕ Add Option
-            </button>
-            <button
-              type="button"
-              onClick={() => removeVariant(variantIndex)}
-              className="border border-red-500 text-red-500 px-4 py-2 rounded-md hover:bg-red-100 transition"
-            >
-              🗑️ Remove Variant
-            </button>
-          </div>
+
+         <div className="flex gap-4 flex-wrap">
+          <button
+            type="button"
+            onClick={() => addOption(variantIndex)}
+            className="border bg-white border-blue-500 text-blue-500 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition ease-in-out duration-300 transform hover:scale-105 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            Add Option
+          </button>
+          <button
+            type="button"
+            onClick={() => removeVariant(variantIndex)}
+            className="border bg-white border-red-500 text-red-500 px-6 py-3 rounded-lg font-semibold hover:bg-red-50 transition ease-in-out duration-300 transform hover:scale-105 shadow-md focus:outline-none focus:ring-2 focus:ring-red-300"
+          >
+            Remove Variant
+          </button>
+        </div>
+
         </div>
       ))}
-  
-      <div className="flex flex-wrap gap-3 mb-6">
+
+      <div className="flex flex-wrap gap-4 mb-6">
         <button
           type="button"
           onClick={addVariant}
-          className="border border-gray-500 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100"
+          className="border bg-white border-gray-500 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition ease-in-out duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
         >
-          ➕ Add Variant
+           Add Variant
         </button>
         <button
           type="button"
           onClick={handleGenerate}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition ease-in-out duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           🚀 Generate Combinations
         </button>
       </div>
-  
+
+
       {combinations.length > 0 && (
         <>
           <h3 className="text-xl font-semibold text-gray-700 mb-4">
             Define Data for Each Combination
           </h3>
-  
-          {combinations.map((combo: any, index: number) => (
+
+          {combinations.map((combo, index) => (
             <div key={index} className="mb-4 bg-gray-100 border border-gray-200 rounded-xl p-4">
               <div className="text-gray-800 font-medium mb-3">
                 {Object.entries(combo.options)
                   .map(([k, v]) => `${k}: ${v}`)
                   .join(" / ")}
               </div>
-  
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {["imageUrl", "price", "stock"].map((field) => (
                   <div className="relative" key={field}>
-                    <input
+                    <FloatingInput
+                      label={field === "imageUrl"
+                          ? "Image URL"
+                          : (field.charAt(0).toUpperCase() + field.slice(1))
+                        }
+                      type={field === "imageUrl" ? "text" : "number"}
+                      value={combo[field]}
+                      onChange={(e) =>
+                          handleCombinationChange(index, field, e.target.value)
+                        }
+                    />
+
+                    {/* <input
                       type={field === "imageUrl" ? "text" : "number"}
                       placeholder=" "
                       value={combo[field]}
@@ -252,25 +261,25 @@ const VariantGenerator: React.FC<VariantGeneratorProps> = ({ onVariantsGenerated
                       {field === "imageUrl"
                         ? "Image URL"
                         : field.charAt(0).toUpperCase() + field.slice(1)}
-                    </label>
+                    </label> */}
                   </div>
                 ))}
               </div>
             </div>
           ))}
-  
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition"
-          >
-            ✅ Submit Variants
-          </button>
+          <div className="flex justify-center mt-6">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-green-700 hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400"
+            >
+              Submit Variants
+            </button>
+          </div>
         </>
       )}
     </div>
   );
-  
 }
-  
+
 export default VariantGenerator;
